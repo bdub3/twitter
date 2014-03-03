@@ -62,7 +62,7 @@ public class TwitterHarvest {
 		TwitterFactory tf = new TwitterFactory();
 		twitter = tf.getInstance();
 		capture = new CaptureLogger("output_" + System.currentTimeMillis()
-				+ ".txt");
+				+ ".csv");
 
 	}
 
@@ -109,6 +109,7 @@ public class TwitterHarvest {
 		addToList(list, status.getIsoLanguageCode());
 		addToList(list, Integer.toString(status.getAccessLevel()));
 		addToList(list, status.getUser().getName());
+		addToList(list, status.getFavoriteCount());
 		if (status.getGeoLocation() != null) {
 			addToList(list, status.getGeoLocation().getLatitude());
 			addToList(list, status.getGeoLocation().getLongitude());
