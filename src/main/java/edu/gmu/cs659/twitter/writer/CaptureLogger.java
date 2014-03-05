@@ -48,14 +48,14 @@ public class CaptureLogger {
 	/**
 	 * Changes required to generate a clean comma delimited file
 	 * 
-	 * cleans up newline characters... replaces them with spaces 
+	 * cleans up newline characters... replaces them with spaces and removes quotations 
 	 * 
 	 * @param row
 	 *            The original row
 	 * @return the result
 	 */
 	private String sanitizeRow(String row) {
-		return row.replaceAll("\\r\\n|\\r|\\n", " ");
+		return row.replaceAll("\\r\\n|\\r|\\n", " ").replace("\"", "").replace("'", "");
 	}
 
 	/**
