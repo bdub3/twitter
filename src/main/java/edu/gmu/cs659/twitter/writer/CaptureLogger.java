@@ -22,8 +22,7 @@ public class CaptureLogger {
 
 	public void writeRow(List<? extends Object> list) {
 		try {			
-			String row = StringUtils.join(sanitizeObjects(list), ",");
-			writer.write(sanitizeRow(row) + System.lineSeparator());
+			writer.write(StringUtils.join(list, ",") + System.lineSeparator());
 		} catch (IOException e) {
 			logger.error("Failed to write Row", e);
 		}
@@ -31,7 +30,7 @@ public class CaptureLogger {
 
 	public void closeWriter() {
 		try {
-			writer.close();
+			writer.close(); 
 		} catch (IOException e) {
 			logger.error("Failed to close writer", e);
 		}
@@ -45,34 +44,4 @@ public class CaptureLogger {
 		}
 	}
 
-	/**
-	 * Changes required to generate a clean comma delimited file
-	 * 
-	 * cleans up newline characters... replaces them with spaces and removes quotations 
-	 * 
-	 * @param row
-	 *            The original row
-	 * @return the result
-	 */
-	private String sanitizeRow(String row) {
-		return row.replaceAll("\\r\\n|\\r|\\n", " ").replace("\"", "").replace("'", "");
-	}
-
-	/**
-	 * Changes required to generate a clean comma delimited file
-	 * 
-	 * cleans up commas in object text... replaces them with spaces 
-	 * 
-	 * @param row
-	 *            The original row
-	 * @return the result
-	 */
-	private List<String> sanitizeObjects(List<? extends Object> row) {
-		List<String> list = new ArrayList<String>();
-		for(Object o : row) {
-			list.add(o.toString().replaceAll(",", " "));
-		}
-		
-		return list;
-	}
 }
