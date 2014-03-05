@@ -79,6 +79,7 @@ public class TwitterHarvest {
 	private void exploreTrend(Trend trend) throws TwitterException {
 		logger.info(trend.getName());
 		Query query = new Query(trend.getQuery());
+		query.count(1000);
 		QueryResult results = twitter.search(query);
 		for (Status status : results.getTweets()) {
 			processTweetFromTrend(status, trend.getName());

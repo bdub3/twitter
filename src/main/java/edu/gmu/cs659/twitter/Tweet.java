@@ -21,7 +21,7 @@ public class Tweet {
 		if (o == null) {
 			list.add("");
 		} else {
-			list.add(sanatizeItem(o.toString()));
+			list.add(sanitizeItem(o.toString()));
 		}
 	}
 	
@@ -29,7 +29,7 @@ public class Tweet {
 		return Collections.unmodifiableList(list);
 	}
 	
-	private String sanatizeItem(String item) {
+	private String sanitizeItem(String item) {
 		return item.replaceAll("\\r\\n|\\r|\\n|,", " ").replace("\"|'", "");
 	}
 }
