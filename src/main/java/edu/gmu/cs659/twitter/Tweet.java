@@ -11,7 +11,8 @@ public class Tweet {
 	public static final List<String> FIELDS = Arrays.asList("trend", "time",
 			"dayTimePeriod", "source", "text", "lang", "accessLevel", "user",
 			"favCount", "lat", "lng", "place", "retweetCount", "hashtaglist",
-			"mediaEntries", "userMentions");
+			"mediaEntries", "userMentions", "hashTagCount", "mediaCount",
+			"userMentionsCount");
 	
 	public Tweet() {
 		list = new ArrayList<String>();

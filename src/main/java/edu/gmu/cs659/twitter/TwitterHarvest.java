@@ -127,6 +127,9 @@ public class TwitterHarvest {
 		tweet.addAttribute(concatTweetEntities(status.getMediaEntities(), "@"));
 		tweet.addAttribute(
 				concatTweetEntities(status.getUserMentionEntities(), "@"));
+		tweet.addAttribute(status.getHashtagEntities().length);
+		tweet.addAttribute(status.getMediaEntities().length);
+		tweet.addAttribute(status.getUserMentionEntities().length);
 
 		capture.writeRow(tweet.getAttributes());
 	}
