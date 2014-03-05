@@ -31,6 +31,6 @@ public class Tweet {
 	}
 	
 	private String sanitizeItem(String item) {
-		return item.replaceAll("\\r\\n|\\r|\\n|,", " ").replace("\"|'", "");
+		return item.replaceAll("\\r\\n|\\r|\\n|,", " ").replaceAll("\"|'", "").replaceAll("[^\\x00-\\x7F]", "");
 	}
 }
