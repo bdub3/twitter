@@ -1,7 +1,6 @@
 package edu.gmu.cs659.twitter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -10,7 +9,6 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.gmu.cs659.twitter.writer.CaptureLogger;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.Status;
@@ -20,6 +18,7 @@ import twitter4j.TweetEntity;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import edu.gmu.cs659.twitter.writer.CaptureLogger;
 
 public class TwitterHarvest {
 
@@ -71,14 +70,10 @@ public class TwitterHarvest {
 	public void grabTestData() throws TwitterException {
 		Trends trends = twitter.getPlaceTrends(WOEID_USA);
 
-		capture.writeRow(Arrays.asList("trend", "time", "dayTimePeriod",
-				"source", "text", "lang", "accessLevel", "user", "favCount",
-				"lat", "lng", "place", "retweetCount", "hashtaglist",
-				"mediaEntries", "userMentions"));
+		capture.writeRow(Tweet.FIELDS);
 		for (Trend trend : trends.getTrends()) {
 			exploreTrend(trend);
 		}
-
 	}
 
 	private void exploreTrend(Trend trend) throws TwitterException {
@@ -91,66 +86,51 @@ public class TwitterHarvest {
 	}
 
 	private void processTweetFromTrend(Status status, String trendName) {
-		List<Object> list = new ArrayList<Object>();
-		addToList(list, trendName);
-		addToList(list, status.getCreatedAt().getTime());
+		Tweet tweet = new Tweet();
+		tweet.addAttribute(trendName);
+		tweet.addAttribute(status.getCreatedAt().getTime());
 
 		// TODO: this type of work should be post-processing collected data
-		addToList(
-				list,
+		tweet.addAttribute(
 				DayTimeMapper.getDayTimeMapper().getPeriod(
 						status.getCreatedAt(), status.getUser().getTimeZone()));
 
-		addToList(list, status.getSource());
+		tweet.addAttribute(status.getSource());
 
 		// TODO: post process to a lists of words across all tweets, treat as
 		// features
-		addToList(list, status.getText());
-		addToList(list, status.getIsoLanguageCode());
-		addToList(list, Integer.toString(status.getAccessLevel()));
-		addToList(list, status.getUser().getName());
-		addToList(list, status.getFavoriteCount());
+		tweet.addAttribute(status.getText());
+		tweet.addAttribute(status.getIsoLanguageCode());
+		tweet.addAttribute(Integer.toString(status.getAccessLevel()));
+		tweet.addAttribute(status.getUser().getName());
+		tweet.addAttribute(status.getFavoriteCount());
 		if (status.getGeoLocation() != null) {
-			addToList(list, status.getGeoLocation().getLatitude());
-			addToList(list, status.getGeoLocation().getLongitude());
+			tweet.addAttribute(status.getGeoLocation().getLatitude());
+			tweet.addAttribute(status.getGeoLocation().getLongitude());
 		} else {
-			addToList(list, null);
-			addToList(list, null);
+			tweet.addAttribute(null);
+			tweet.addAttribute(null);
 		}
 
 		// TODO: lot more semantics to this object
 		if(status.getPlace() != null) {
-			addToList(list, status.getPlace().getFullName());
+			tweet.addAttribute(status.getPlace().getFullName());
 		} else {
-			addToList(list, null);
+			tweet.addAttribute(null);
 		}
 
-		addToList(list, status.getRetweetCount());
+		tweet.addAttribute(status.getRetweetCount());
 
 		// could be interesting... co-occurance... build graphs
-		addToList(list, concatTweetEntities(status.getHashtagEntities(), "#"));
-		addToList(list, concatTweetEntities(status.getMediaEntities(), "@"));
-		addToList(list,
+		tweet.addAttribute(concatTweetEntities(status.getHashtagEntities(), "#"));
+		tweet.addAttribute(concatTweetEntities(status.getMediaEntities(), "@"));
+		tweet.addAttribute(
 				concatTweetEntities(status.getUserMentionEntities(), "@"));
 
-		capture.writeRow(list);
+		capture.writeRow(tweet.getAttributes());
 	}
 
-	/**
-	 * null safe add
-	 * 
-	 * @param list
-	 *            list to add to
-	 * @param o
-	 *            item to add, or "" if item is null
-	 */
-	private void addToList(List<Object> list, Object o) {
-		if (o == null) {
-			list.add("");
-		} else {
-			list.add(o);
-		}
-	}
+
 
 	private String concatTweetEntities(TweetEntity[] entities, String delimiter) {
 		if (entities == null) {
