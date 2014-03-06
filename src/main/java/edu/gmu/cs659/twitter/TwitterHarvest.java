@@ -19,6 +19,7 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import edu.gmu.cs659.twitter.writer.CaptureLogger;
+import edu.gmu.cs659.twitter.writer.TermCapture;
 
 public class TwitterHarvest {
 
@@ -29,6 +30,10 @@ public class TwitterHarvest {
 	private static final int WOEID_USA = 23424977;
 
 	private CaptureLogger capture;
+	
+	private TermCapture termCapture;
+	
+	private List<Tweet> tweets;
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(TwitterHarvest.class);
@@ -44,6 +49,7 @@ public class TwitterHarvest {
 			logger.error("Failed! : ", e);
 		} finally {
 			harvest.capture.closeWriter();
+			harvest.termCapture.closeWriter();
 		}
 	}
 
@@ -62,7 +68,9 @@ public class TwitterHarvest {
 		twitter = tf.getInstance();
 		capture = new CaptureLogger("output_" + System.currentTimeMillis()
 				+ ".csv");
-
+		termCapture = new TermCapture("tweetTerms_" + System.currentTimeMillis()
+				+ ".csv");
+		tweets = new ArrayList<Tweet>();
 	}
 
 	// hmm they stole our project: http://www.hashtags.org/trending-on-twitter/
@@ -74,6 +82,8 @@ public class TwitterHarvest {
 		for (Trend trend : trends.getTrends()) {
 			exploreTrend(trend);
 		}
+		
+		termCapture.writeData(tweets);
 	}
 
 	private void exploreTrend(Trend trend) throws TwitterException {
@@ -88,6 +98,11 @@ public class TwitterHarvest {
 
 	private void processTweetFromTrend(Status status, String trendName) {
 		Tweet tweet = new Tweet();
+		tweets.add(tweet);
+
+		tweet.setTweetClass(trendName);
+		tweet.addStatus(status.getText());
+		
 		tweet.addAttribute(trendName);
 		tweet.addAttribute(status.getCreatedAt().getTime());
 

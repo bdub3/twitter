@@ -3,8 +3,7 @@ package edu.gmu.cs659.twitter.writer;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -19,10 +18,10 @@ public class CaptureLogger {
 	public CaptureLogger(String file) {
 		setFileWriter(file);
 	}
-
-	public void writeRow(List<? extends Object> list) {
+	
+	public void writeRow(Collection<? extends Object> items) {
 		try {			
-			writer.write(StringUtils.join(list, ",") + System.lineSeparator());
+			writer.write(StringUtils.join(items, ",") + System.lineSeparator());
 		} catch (IOException e) {
 			logger.error("Failed to write Row", e);
 		}

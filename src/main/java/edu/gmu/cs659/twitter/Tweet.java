@@ -6,7 +6,14 @@ import java.util.Collections;
 import java.util.List;
 
 public class Tweet {
-	List<String> list;
+
+	private List<String> metaAttributes;
+	
+	private String tweetStatus;
+	
+	private String tweetClass;
+	
+	private List<String> terms;
 	
 	public static final List<String> FIELDS = Arrays.asList("trend", "time",
 			"dayTimePeriod", "source", "text", "lang", "accessLevel", "user",
@@ -15,22 +22,46 @@ public class Tweet {
 			"userMentionsCount");
 	
 	public Tweet() {
-		list = new ArrayList<String>();
+		metaAttributes = new ArrayList<String>();
+		terms = new ArrayList<String>();
 	}
 
+	public void setTweetClass(String tweetClass) {
+		this.tweetClass = tweetClass;
+	}
+	
+	public String getTweetClass() {
+		return tweetClass;
+	}
+	
 	public void addAttribute(Object o) {
 		if (o == null) {
-			list.add("");
+			metaAttributes.add("");
 		} else {
-			list.add(sanitizeItem(o.toString()));
+			metaAttributes.add(sanitizeItem(o.toString()));
 		}
 	}
-	
-	public List<String> getAttributes() {
-		return Collections.unmodifiableList(list);
+
+	public void addStatus(String status) {
+		tweetStatus = status;
+		terms.clear();
+		if (status != null) {
+			terms.addAll(Arrays.asList(sanitizeItem(status).split(" ")));
+		}
 	}
-	
+
+	public List<String> getAttributes() {
+		return Collections.unmodifiableList(metaAttributes);
+	}
+
+	public List<String> getTerms() {
+		return Collections.unmodifiableList(terms);
+	}	
+
 	private String sanitizeItem(String item) {
-		return item.replaceAll("\\r\\n|\\r|\\n|,", " ").replaceAll("\"|'", "").replaceAll("[^\\x00-\\x7F]", "");
+		// first replaceAll removes characters with empty string (want empty string to turn don't into dont
+		// second replaceAll removes all characters not listed
+		// trim and the final replaceAll reduces whitespace, no leading or trailing, and all interior is only a single space
+		return item.replaceAll("[\"']", "").replaceAll("[^A-Za-z0-9:#<>/\\\\.?!=@_-]", " ").trim().replaceAll(" +", " ");
 	}
 }
