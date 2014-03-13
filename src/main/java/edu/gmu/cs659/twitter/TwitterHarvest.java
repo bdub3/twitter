@@ -104,7 +104,7 @@ public class TwitterHarvest {
 		tweet.addStatus(status.getText());
 		
 		tweet.addAttribute(trendName);
-		tweet.addAttribute(status.getCreatedAt().getTime());
+		tweet.addAttribute(dateTimeFormatter.print(status.getCreatedAt().getTime()));
 
 		// TODO: this type of work should be post-processing collected data
 		tweet.addAttribute(
