@@ -19,6 +19,7 @@ public class TermCapture extends CaptureLogger {
 		super(file);
 	}
 
+	@Override
 	public void writeData(List<Tweet> tweets) {
 		logger.debug("Writing term file");
 		

@@ -78,11 +78,11 @@ public class TwitterHarvest {
 	public void grabTestData() throws TwitterException {
 		Trends trends = twitter.getPlaceTrends(WOEID_USA);
 
-		capture.writeRow(Tweet.FIELDS);
 		for (Trend trend : trends.getTrends()) {
 			exploreTrend(trend);
 		}
 		
+		capture.writeData(tweets);
 		termCapture.writeData(tweets);
 	}
 
@@ -101,10 +101,12 @@ public class TwitterHarvest {
 		tweets.add(tweet);
 
 		tweet.setTweetClass(trendName);
-		tweet.addStatus(status.getText());
+		tweet.setTweetStatus(status.getText());
 		
 		tweet.addAttribute(trendName);
 		tweet.addAttribute(dateTimeFormatter.print(status.getCreatedAt().getTime()));
+		tweet.addAttribute(status.getCreatedAt().getTime());
+		tweet.setTimeStamp(status.getCreatedAt().getTime());
 
 		// TODO: this type of work should be post-processing collected data
 		tweet.addAttribute(
@@ -145,8 +147,6 @@ public class TwitterHarvest {
 		tweet.addAttribute(status.getHashtagEntities().length);
 		tweet.addAttribute(status.getMediaEntities().length);
 		tweet.addAttribute(status.getUserMentionEntities().length);
-
-		capture.writeRow(tweet.getAttributes());
 	}
 
 

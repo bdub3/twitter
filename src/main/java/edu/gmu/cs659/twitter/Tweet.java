@@ -10,16 +10,18 @@ public class Tweet {
 	private List<String> metaAttributes;
 	
 	private String tweetStatus;
+
+	private Long timeStamp;
 	
 	private String tweetClass;
 	
 	private List<String> terms;
 	
 	public static final List<String> FIELDS = Arrays.asList("trend", "time",
-			"dayTimePeriod", "source", "text", "lang", "accessLevel", "user",
-			"favCount", "lat", "lng", "place", "retweetCount", "hashtaglist",
-			"mediaEntries", "userMentions", "hashTagCount", "mediaCount",
-			"userMentionsCount");
+			"timeStamp", "dayTimePeriod", "source", "text", "lang",
+			"accessLevel", "user", "favCount", "lat", "lng", "place",
+			"retweetCount", "hashtaglist", "mediaEntries", "userMentions",
+			"hashTagCount", "mediaCount", "userMentionsCount");
 	
 	public Tweet() {
 		metaAttributes = new ArrayList<String>();
@@ -42,13 +44,26 @@ public class Tweet {
 		}
 	}
 
-	public void addStatus(String status) {
-		tweetStatus = status;
+	public String getTweetStatus() {
+		return tweetStatus;
+	}
+
+	public void setTweetStatus(String tweetStatus) {
+		this.tweetStatus = tweetStatus;
 		terms.clear();
-		if (status != null) {
-			terms.addAll(Arrays.asList(sanitizeItem(status).split(" ")));
+		if (tweetStatus != null) {
+			terms.addAll(Arrays.asList(sanitizeItem(tweetStatus).split(" ")));
 		}
 	}
+
+	public Long getTimeStamp() {
+		return timeStamp;
+	}
+
+	public void setTimeStamp(Long timeStamp) {
+		this.timeStamp = timeStamp;
+	}
+
 
 	public List<String> getAttributes() {
 		return Collections.unmodifiableList(metaAttributes);
