@@ -20,8 +20,11 @@ import edu.gmu.cs659.twitter.AutoCorrectUtil;
 
 public class SpellcheckerTest {
 	
-	@Test
+//	@Test
 	public void AutoCorrectUtilTest(){
+		
+		System.out.println(AutoCorrectUtil.autoCorrect("in"));
+		System.out.println(AutoCorrectUtil.autoCorrect("a"));
 		
 		Assert.assertEquals("hello", AutoCorrectUtil.autoCorrect("hello"));
 		Assert.assertEquals("support", AutoCorrectUtil.autoCorrect("wupport"));
@@ -31,7 +34,7 @@ public class SpellcheckerTest {
 	}
 	
 	
-//	@Test
+	@Test
 	public void testLibrary() throws IOException{
 		
 		//reference dictionary file
@@ -45,7 +48,7 @@ public class SpellcheckerTest {
 		PlainTextDictionary dictionary = new PlainTextDictionary(file);
 		spellChecker.indexDictionary(dictionary);
 		
-        String word = "improvment";
+        String word = "an";
         
         //tests for correct spelling
         if ( spellChecker.exist(word) ){
@@ -72,7 +75,7 @@ public class SpellcheckerTest {
         }
         
         //use the spell checker for suggestions
-        int suggestionsNumber = 5;
+        int suggestionsNumber = 1;
 	    String[] suggestions = spellChecker.suggestSimilar(word, suggestionsNumber);
 	    
         if (suggestions!=null && suggestions.length>0) {

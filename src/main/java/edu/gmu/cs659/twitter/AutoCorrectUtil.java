@@ -39,8 +39,8 @@ public class AutoCorrectUtil {
 			if ( corrected != null )
 				return corrected;
 			
-			String[] suggestions = spellChecker.suggestSimilar(word, 1);
-			return suggestions[0];
+			String[] suggestion = spellChecker.suggestSimilar(word, 1);
+			return suggestion.length > 0 ? suggestion[0] : word; 
 		
 		} catch (IOException e){
 			return word;
