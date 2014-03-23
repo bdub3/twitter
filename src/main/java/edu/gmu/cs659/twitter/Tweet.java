@@ -77,6 +77,7 @@ public class Tweet {
 		// first replaceAll removes characters with empty string (want empty string to turn don't into dont
 		// second replaceAll removes all characters not listed
 		// trim and the final replaceAll reduces whitespace, no leading or trailing, and all interior is only a single space
-		return item.replaceAll("[\"']", "").replaceAll("[^A-Za-z0-9:#<>/\\\\.?!=@_-]", " ").trim().replaceAll(" +", " ");
+		//return item.replaceAll("[\"']", "").replaceAll("[^A-Za-z0-9:#<>/\\\\.?!=@_-]", " ").trim().replaceAll(" +", " ");
+		return item.replaceAll("[\"']", "").replaceAll("[^A-Za-z0-9]", " ").trim().replaceAll(" +", " ");
 	}
 }
