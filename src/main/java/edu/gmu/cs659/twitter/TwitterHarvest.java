@@ -11,13 +11,18 @@ import org.slf4j.LoggerFactory;
 
 import twitter4j.Query;
 import twitter4j.QueryResult;
+import twitter4j.StallWarning;
 import twitter4j.Status;
+import twitter4j.StatusDeletionNotice;
+import twitter4j.StatusListener;
 import twitter4j.Trend;
 import twitter4j.Trends;
 import twitter4j.TweetEntity;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.TwitterStream;
+import twitter4j.TwitterStreamFactory;
 import edu.gmu.cs659.twitter.writer.CaptureLogger;
 import edu.gmu.cs659.twitter.writer.TermCapture;
 
@@ -40,20 +45,15 @@ public class TwitterHarvest {
 
 	public static void main(String[] args) {
 		TwitterHarvest harvest = new TwitterHarvest();
-		try {
-			harvest.grabTestData();
-		} catch (TwitterException e) {
-			logger.error("Failed! : ", e);
-			e.printStackTrace();
-		} catch (Exception e) {
-			logger.error("Failed! : ", e);
-		} finally {
-			harvest.capture.closeWriter();
-			harvest.termCapture.closeWriter();
-		}
+
+		harvest.captureStreamingSample();
+
+		//harvest.extractTrends();
 	}
 
+
 	private Twitter twitter;
+	private TwitterStream twitterStream;
 
 	public TwitterHarvest() {
 
@@ -64,15 +64,46 @@ public class TwitterHarvest {
 				.setOAuthAccessToken(ACCESS_TOKEN)
 				.setOAuthAccessTokenSecret(ACCESS_TOKEN_SECRET);
 		*/
+
 		TwitterFactory tf = new TwitterFactory();
 		twitter = tf.getInstance();
+
+		tweets = new ArrayList<Tweet>();
+	}
+
+	private void extractTrends() {
+		try {
+			captureTrends();
+			grabTestData();
+		} catch (TwitterException e) {
+			logger.error("Failed! : ", e);
+			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("Failed! : ", e);
+		} finally {
+			capture.closeWriter();
+			termCapture.closeWriter();
+		}
+	}
+
+	private void captureTrends() {
 		capture = new CaptureLogger("output_" + System.currentTimeMillis()
 				+ ".csv");
 		termCapture = new TermCapture("tweetTerms_" + System.currentTimeMillis()
 				+ ".csv");
-		tweets = new ArrayList<Tweet>();
 	}
 
+	public void captureStreamingSample() {
+		TwitterStreamFactory streamFactory = new TwitterStreamFactory();
+		twitterStream = streamFactory.getInstance();
+		CaptureLogger streamCapture = new CaptureLogger("streamSample_"
+				+ System.currentTimeMillis() + ".csv");
+		streamCapture.writeRow(Tweet.FIELDS);
+
+		twitterStream.addListener(new StreamStatusListener(streamCapture ));
+		twitterStream.sample();		
+	}
+	
 	// hmm they stole our project: http://www.hashtags.org/trending-on-twitter/
 
 	public void grabTestData() throws TwitterException {
@@ -96,7 +127,11 @@ public class TwitterHarvest {
 		}
 	}
 
-	private void processTweetFromTrend(Status status, String trendName) {
+	private Tweet processTweet(Status status) {
+		return processTweetFromTrend(status, null); 
+	}
+	
+	private Tweet processTweetFromTrend(Status status, String trendName) {
 		Tweet tweet = new Tweet();
 		tweets.add(tweet);
 
@@ -118,7 +153,7 @@ public class TwitterHarvest {
 		// TODO: post process to a lists of words across all tweets, treat as
 		// features
 		tweet.addAttribute(status.getText());
-		tweet.addAttribute(status.getIsoLanguageCode());
+		tweet.addAttribute(status.getLang());
 		tweet.addAttribute(Integer.toString(status.getAccessLevel()));
 		tweet.addAttribute(status.getUser().getName());
 		tweet.addAttribute(status.getFavoriteCount());
@@ -147,6 +182,8 @@ public class TwitterHarvest {
 		tweet.addAttribute(status.getHashtagEntities().length);
 		tweet.addAttribute(status.getMediaEntities().length);
 		tweet.addAttribute(status.getUserMentionEntities().length);
+		
+		return tweet;
 	}
 
 
@@ -163,5 +200,36 @@ public class TwitterHarvest {
 		return StringUtils.join(list, delimiter);
 
 	}
+
+    public class StreamStatusListener implements StatusListener {
+    	
+    	private CaptureLogger capture;
+    	
+    	public StreamStatusListener(CaptureLogger capture) {
+    		this.capture = capture;
+    	}
+    	
+        public void onStatus(Status status) {
+        	Tweet tweet = processTweet(status);
+        	capture.writeRow(tweet.getAttributes());
+        }
+
+        public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
+            logger.debug("StatusDeletionNotice: {}", statusDeletionNotice);        	
+        }
+        
+        public void onTrackLimitationNotice(int numberOfLimitedStatuses) {
+            logger.debug("Track Limitation Notice: {}", numberOfLimitedStatuses);
+        }
+
+        public void onException(Exception ex) {
+            logger.error("Exception in Stream Listener", ex);
+        }
+		public void onScrubGeo(long arg0, long arg1) {
+            logger.debug("Scrub Geo: {}, {}", arg0, arg1);
+		}
+		public void onStallWarning(StallWarning arg0) {
+		}
+    };
 
 }
