@@ -41,10 +41,18 @@ public class Tweet {
 	}
 
 	public void addAttribute(Object o) {
+		addAttribute(o, false);
+	}
+	
+	public void addAttribute(Object o, boolean sanitize) {
 		if (o == null) {
 			metaAttributes.add("");
 		} else {
-			metaAttributes.add(sanitizeItem(o.toString()));
+			if(sanitize) {
+				metaAttributes.add(sanitizeItem(o.toString()));
+			} else {
+				metaAttributes.add(o.toString());
+			}
 		}
 	}
 

@@ -187,7 +187,7 @@ public class TwitterHarvest {
 		tweet.setTweetClass(trendName);
 		tweet.setTweetStatus(status.getText());
 		
-		tweet.addAttribute(trendName);
+		tweet.addAttribute(trendName, true);
 		tweet.addAttribute(dateTimeFormatter.print(status.getCreatedAt().getTime()));
 		tweet.addAttribute(status.getCreatedAt().getTime());
 		tweet.setTimeStamp(status.getCreatedAt().getTime());
@@ -204,16 +204,16 @@ public class TwitterHarvest {
 		tweet.addAttribute(DayTimeMapper.getDayTimeMapper().getPeriod(
 				status.getCreatedAt(), tz));
 		tweet.addAttribute(status.getUser().getTimeZone());
-		tweet.addAttribute(status.getUser().getLocation());
+		tweet.addAttribute(status.getUser().getLocation(), true);
 
-		tweet.addAttribute(status.getSource());
+		tweet.addAttribute(status.getSource(), true);
 
 		// TODO: post process to a lists of words across all tweets, treat as
 		// features
-		tweet.addAttribute(status.getText());
+		tweet.addAttribute(status.getText(), true);
 		tweet.addAttribute(status.getLang());
-		tweet.addAttribute(Integer.toString(status.getAccessLevel()));
-		tweet.addAttribute(status.getUser().getName());
+		tweet.addAttribute(status.getAccessLevel());
+		tweet.addAttribute(status.getUser().getName(), true);
 		tweet.addAttribute(status.getFavoriteCount());
 		if (status.getGeoLocation() != null) {
 			tweet.addAttribute(status.getGeoLocation().getLatitude());
@@ -225,7 +225,7 @@ public class TwitterHarvest {
 
 		// TODO: lot more semantics to this object
 		if(status.getPlace() != null) {
-			tweet.addAttribute(status.getPlace().getFullName());
+			tweet.addAttribute(status.getPlace().getFullName(), true);
 		} else {
 			tweet.addAttribute(null);
 		}
@@ -233,10 +233,10 @@ public class TwitterHarvest {
 		tweet.addAttribute(status.getRetweetCount());
 
 		// could be interesting... co-occurance... build graphs
-		tweet.addAttribute(concatTweetEntities(status.getHashtagEntities(), "#"));
-		tweet.addAttribute(concatTweetEntities(status.getMediaEntities(), "@"));
+		tweet.addAttribute(concatTweetEntities(status.getHashtagEntities(), " "), true);
+		tweet.addAttribute(concatTweetEntities(status.getMediaEntities(), " "), true);
 		tweet.addAttribute(
-				concatTweetEntities(status.getUserMentionEntities(), "@"));
+				concatTweetEntities(status.getUserMentionEntities(), " "), true);
 		tweet.addAttribute(status.getHashtagEntities().length);
 		tweet.addAttribute(status.getMediaEntities().length);
 		tweet.addAttribute(status.getUserMentionEntities().length);
