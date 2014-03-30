@@ -18,10 +18,10 @@ public class Tweet {
 	private List<String> terms;
 	
 	public static final List<String> FIELDS = Arrays.asList("trend", "time",
-			"timeStamp", "dayTimePeriod", "userTimeZone", "source", "text",
-			"lang", "accessLevel", "user", "favCount", "lat", "lng", "place",
-			"retweetCount", "hashtaglist", "mediaEntries", "userMentions",
-			"hashTagCount", "mediaCount", "userMentionsCount");
+			"timeStamp", "dayTimePeriod", "userTimeZone", "userLocation",
+			"source", "text", "lang", "accessLevel", "user", "favCount", "lat",
+			"lng", "place", "retweetCount", "hashtaglist", "mediaEntries",
+			"userMentions", "hashTagCount", "mediaCount", "userMentionsCount");
 	
 	public Tweet() {
 		metaAttributes = new ArrayList<String>();
