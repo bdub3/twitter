@@ -3,4 +3,4 @@ output*
 tweetTerms*
 *.csv
 *.arff
-
+*.txt

@@ -35,7 +35,11 @@ public class Tweet {
 	public String getTweetClass() {
 		return tweetClass;
 	}
-	
+
+	public String getSafeTweetClass() {
+		return sanitizeItem(tweetClass);
+	}
+
 	public void addAttribute(Object o) {
 		if (o == null) {
 			metaAttributes.add("");

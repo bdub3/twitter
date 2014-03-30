@@ -32,10 +32,10 @@ public class TermCapture extends CaptureLogger {
 
 		// remove all class terms from term list
 		for(Tweet tweet : tweets) {
-			terms.remove(tweet.getTweetClass());
+			terms.remove(tweet.getSafeTweetClass());
 		}
 
-		// just in case there is a term which matches out class name
+		// just in case there is a term which matches our class name
 		terms.remove("class");
 		
 		List<String> list = new ArrayList<String>();
@@ -49,7 +49,7 @@ public class TermCapture extends CaptureLogger {
 			for(String term : terms) {
 				counts.add(Collections.frequency(tweet.getTerms(), term));
 			}
-			counts.add(tweet.getTweetClass());
+			counts.add(tweet.getSafeTweetClass());
 			this.writeRow(counts);
 		}
 	}

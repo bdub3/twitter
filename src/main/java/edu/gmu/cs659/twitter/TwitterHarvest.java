@@ -3,6 +3,11 @@ package edu.gmu.cs659.twitter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.Parser;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -34,11 +39,15 @@ public class TwitterHarvest {
 
 	private static final int WOEID_USA = 23424977;
 
-	private CaptureLogger capture;
-	
-	private TermCapture termCapture;
 	
 	private List<Tweet> tweets;
+
+	private static final String STREAMING = "s";
+	private static final String STREAMING_TIMEOUT = "t";
+
+	// default values
+	static boolean doStreaming = false;
+	static long timeToRun = 60;
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(TwitterHarvest.class);
@@ -46,9 +55,41 @@ public class TwitterHarvest {
 	public static void main(String[] args) {
 		TwitterHarvest harvest = new TwitterHarvest();
 
-		harvest.captureStreamingSample();
+		parseCommandLine(args);
 
-		//harvest.extractTrends();
+		if(doStreaming) {
+			harvest.captureStreamingSample();
+		} else {
+			harvest.extractTrends();
+		}
+	}
+
+	private static void parseCommandLine(String[] args) {
+		Parser parser = new BasicParser();
+		Options options = new Options();
+		options.addOption(STREAMING, false, "Set to run in streaming mode");
+		options.addOption(STREAMING_TIMEOUT, true, "Time to run streaming, in seconds.  Only applies in streaming mode");
+
+		try {
+			CommandLine commands = parser.parse(options, args);
+
+			if(commands.hasOption(STREAMING)) {
+				doStreaming = true;
+				if(commands.hasOption(STREAMING_TIMEOUT)) {
+					try {
+						timeToRun = Integer.parseInt(commands.getOptionValue(STREAMING_TIMEOUT));
+						if(timeToRun < 1) {
+							logger.warn("Must have a positive time to run, using default value", 60);
+							
+						}
+					} catch (NumberFormatException e) {
+						logger.warn("Failed to parse timeout: {}.  Using default value", commands.getOptionValue(STREAMING_TIMEOUT));
+					}
+				}
+			}
+		} catch (ParseException e) {
+			logger.warn("Failed to parse options: {}.  Using default values", options);
+		}
 	}
 
 
@@ -72,9 +113,12 @@ public class TwitterHarvest {
 	}
 
 	private void extractTrends() {
+		CaptureLogger capture = new CaptureLogger("output_" + System.currentTimeMillis()
+				+ ".csv");
+		TermCapture termCapture = new TermCapture("tweetTerms_" + System.currentTimeMillis()
+				+ ".csv");
 		try {
-			captureTrends();
-			grabTestData();
+			grabTestData(capture, termCapture);
 		} catch (TwitterException e) {
 			logger.error("Failed! : ", e);
 			e.printStackTrace();
@@ -86,12 +130,6 @@ public class TwitterHarvest {
 		}
 	}
 
-	private void captureTrends() {
-		capture = new CaptureLogger("output_" + System.currentTimeMillis()
-				+ ".csv");
-		termCapture = new TermCapture("tweetTerms_" + System.currentTimeMillis()
-				+ ".csv");
-	}
 
 	public void captureStreamingSample() {
 		TwitterStreamFactory streamFactory = new TwitterStreamFactory();
@@ -100,13 +138,23 @@ public class TwitterHarvest {
 				+ System.currentTimeMillis() + ".csv");
 		streamCapture.writeRow(Tweet.FIELDS);
 
-		twitterStream.addListener(new StreamStatusListener(streamCapture ));
-		twitterStream.sample();		
+		twitterStream.addListener(new StreamStatusListener(streamCapture));
+		twitterStream.sample();
+		
+		try {
+			Thread.sleep(timeToRun * 1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		twitterStream.cleanUp();
+		streamCapture.closeWriter();
 	}
 	
 	// hmm they stole our project: http://www.hashtags.org/trending-on-twitter/
-
-	public void grabTestData() throws TwitterException {
+		
+	public void grabTestData(CaptureLogger capture, TermCapture termCapture)
+			throws TwitterException {
 		Trends trends = twitter.getPlaceTrends(WOEID_USA);
 
 		for (Trend trend : trends.getTrends()) {
