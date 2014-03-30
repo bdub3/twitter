@@ -2,6 +2,7 @@ package edu.gmu.cs659.twitter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -192,9 +193,17 @@ public class TwitterHarvest {
 		tweet.setTimeStamp(status.getCreatedAt().getTime());
 
 		// TODO: this type of work should be post-processing collected data
-		tweet.addAttribute(
-				DayTimeMapper.getDayTimeMapper().getPeriod(
-						status.getCreatedAt(), status.getUser().getTimeZone()));
+		TimeZone tz = TimeZone.getDefault();
+		String[] tzIds = TimeZone.getAvailableIDs(status.getUser().getUtcOffset() * 1000);
+		for(String id : tzIds) {
+			tz = TimeZone.getTimeZone(id);
+			if(tz.getRawOffset() != 0) {
+				break;  // found something
+			}
+		}
+		tweet.addAttribute(DayTimeMapper.getDayTimeMapper().getPeriod(
+				status.getCreatedAt(), tz));
+		tweet.addAttribute(status.getUser().getTimeZone());
 
 		tweet.addAttribute(status.getSource());
 
