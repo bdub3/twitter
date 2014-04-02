@@ -1,6 +1,7 @@
 /target
+/dictDir
 output*
 tweetTerms*
 *.csv
 *.arff
-*.txt
+*.out

@@ -3,7 +3,17 @@ package edu.gmu.cs659.twitter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import edu.gmu.cs659.twitter.words.AutoCorrectUtil;
+import edu.gmu.cs659.twitter.words.InternetShortHandChecker;
+import edu.gmu.cs659.twitter.words.NumericFilter;
+import edu.gmu.cs659.twitter.words.ShortWordFilter;
+import edu.gmu.cs659.twitter.words.StopWordFilter;
+import edu.gmu.cs659.twitter.words.WordChecker;
+import edu.gmu.cs659.twitter.words.WordSanitizer;
 
 public class Tweet {
 
@@ -15,7 +25,23 @@ public class Tweet {
 	
 	private String tweetClass;
 	
-	private List<String> terms;
+	private Set<String> terms;
+	
+	private static final List<WordChecker> checkers;
+	
+	static {
+		List<WordChecker> c = new ArrayList<WordChecker>();
+		// note, order matters, these are run serially
+		c.add(new InternetShortHandChecker());
+		c.add(new WordSanitizer());
+		c.add(new NumericFilter());
+		c.add(new ShortWordFilter());
+		c.add(new StopWordFilter());
+		c.add(new AutoCorrectUtil());
+		c.add(new WordSanitizer());  // sanitize again incase autocorrect added stuff, tick marks, etc
+		
+		checkers = Collections.unmodifiableList(c);
+	}
 	
 	public static final List<String> FIELDS = Arrays.asList("trend", "time",
 			"timeStamp", "dayTimePeriod", "userTimeZone", "userLocation",
@@ -25,7 +51,7 @@ public class Tweet {
 	
 	public Tweet() {
 		metaAttributes = new ArrayList<String>();
-		terms = new ArrayList<String>();
+		terms = new HashSet<String>();
 	}
 
 	public void setTweetClass(String tweetClass) {
@@ -38,6 +64,10 @@ public class Tweet {
 
 	public String getSafeTweetClass() {
 		return sanitizeItem(tweetClass);
+	}
+
+	public Set<String> getTweetClassTerms() {
+		return termifyString(getSafeTweetClass());
 	}
 
 	public void addAttribute(Object o) {
@@ -62,10 +92,30 @@ public class Tweet {
 
 	public void setTweetStatus(String tweetStatus) {
 		this.tweetStatus = tweetStatus;
-		terms.clear();
+		terms = termifyString(tweetStatus);
+	}
+
+	private Set<String> termifyString(String tweetStatus) {
+		Set<String> termSet = new HashSet<String>();
 		if (tweetStatus != null) {
-			terms.addAll(Arrays.asList(sanitizeItem(tweetStatus).split(" ")));
+			// chop into words
+			List<String> words = Arrays.asList(tweetStatus.split("\\s+"));
+
+			for(WordChecker wc : checkers) {
+				List<String> newWords = new ArrayList<String>();
+
+				for(String word : words) {
+					if(word != null) {
+						newWords.addAll(wc.checkWord(word));
+					}
+				}
+				
+				words = newWords;
+			}
+			termSet.addAll(words);
 		}
+		
+		return termSet;
 	}
 
 	public Long getTimeStamp() {
@@ -81,8 +131,8 @@ public class Tweet {
 		return Collections.unmodifiableList(metaAttributes);
 	}
 
-	public List<String> getTerms() {
-		return Collections.unmodifiableList(terms);
+	public Set<String> getTerms() {
+		return Collections.unmodifiableSet(terms);
 	}	
 
 	private String sanitizeItem(String item) {

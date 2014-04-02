@@ -32,7 +32,7 @@ public class TermCapture extends CaptureLogger {
 
 		// remove all class terms from term list
 		for(Tweet tweet : tweets) {
-			terms.remove(tweet.getSafeTweetClass());
+			terms.removeAll(tweet.getTweetClassTerms());
 		}
 
 		// just in case there is a term which matches our class name
