@@ -15,6 +15,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import twitter4j.FilterQuery;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.StallWarning;
@@ -48,7 +49,7 @@ public class TwitterHarvest {
 
 	// default values
 	static boolean doStreaming = false;
-	static long timeToRun = 60;
+	static long timeToRun = 300;
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(TwitterHarvest.class);
@@ -140,8 +141,14 @@ public class TwitterHarvest {
 		streamCapture.writeRow(Tweet.FIELDS);
 
 		twitterStream.addListener(new StreamStatusListener(streamCapture));
-		twitterStream.sample();
 		
+		//twitterStream.sample();
+		
+		FilterQuery query = new FilterQuery();
+	    double[][] locations = { {-74.0, 40.0}, {-73.0, 41.0} };
+	    query.locations(locations);
+		twitterStream.filter(query);
+	    
 		try {
 			Thread.sleep(timeToRun * 1000);
 		} catch (InterruptedException e) {
