@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+
 import edu.gmu.cs659.twitter.words.AutoCorrectUtil;
 import edu.gmu.cs659.twitter.words.InternetShortHandChecker;
 import edu.gmu.cs659.twitter.words.NumericFilter;
@@ -45,9 +47,10 @@ public class Tweet {
 	
 	public static final List<String> FIELDS = Arrays.asList("trend", "time",
 			"timeStamp", "dayTimePeriod", "userTimeZone", "userLocation",
-			"source", "text", "lang", "accessLevel", "user", "favCount", "lat",
-			"lng", "place", "retweetCount", "hashtaglist", "mediaEntries",
-			"userMentions", "hashTagCount", "mediaCount", "userMentionsCount");
+			"source", "text", "cleanText", "lang", "accessLevel", "user",
+			"favCount", "lat", "lng", "place", "retweetCount", "hashtaglist",
+			"mediaEntries", "userMentions", "hashTagCount", "mediaCount",
+			"userMentionsCount");
 	
 	public Tweet() {
 		metaAttributes = new ArrayList<String>();
@@ -135,7 +138,18 @@ public class Tweet {
 		return Collections.unmodifiableSet(terms);
 	}	
 
+	public String getCleanedText() {
+		Set<String> set = new HashSet<String>();
+		set.addAll(getTerms());
+		set.removeAll(getTweetClassTerms());
+		
+		return StringUtils.join(set, " ");
+	}
+	
 	private String sanitizeItem(String item) {
+		if(item == null) {
+			return "";
+		}
 		// first replaceAll removes characters with empty string (want empty string to turn don't into dont
 		// second replaceAll removes all characters not listed
 		// trim and the final replaceAll reduces whitespace, no leading or trailing, and all interior is only a single space
