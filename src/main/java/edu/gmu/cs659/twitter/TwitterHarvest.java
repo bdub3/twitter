@@ -210,7 +210,8 @@ public class TwitterHarvest {
 		}
 		tweet.addAttribute(DayTimeMapper.getDayTimeMapper().getPeriod(
 				status.getCreatedAt(), tz));
-		tweet.addAttribute(status.getUser().getTimeZone().replace("'", ""));
+		tweet.addAttribute(status.getUser().getTimeZone() != null ? status
+				.getUser().getTimeZone().replace("'", "") : null);
 		tweet.addAttribute(status.getUser().getLocation(), true);
 
 		tweet.addAttribute(status.getSource(), true);
