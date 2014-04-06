@@ -215,9 +215,8 @@ public class TwitterHarvest {
 
 		tweet.addAttribute(status.getSource(), true);
 
-		// TODO: post process to a lists of words across all tweets, treat as
-		// features
 		tweet.addAttribute(status.getText(), true);
+		tweet.addAttribute(tweet.getCleanedText()); // must be after setTweetStatus is called
 		tweet.addAttribute(status.getLang());
 		tweet.addAttribute(status.getAccessLevel());
 		tweet.addAttribute(status.getUser().getName(), true);
