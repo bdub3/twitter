@@ -49,7 +49,7 @@ public class TwitterHarvest {
 
 	// default values
 	static boolean doStreaming = false;
-	static long timeToRun = 300;
+	static long timeToRun = 60;
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(TwitterHarvest.class);
@@ -145,7 +145,7 @@ public class TwitterHarvest {
 		//twitterStream.sample();
 		
 		FilterQuery query = new FilterQuery();
-	    double[][] locations = { {-74.0, 40.0}, {-73.0, 41.0} };
+	    double[][] locations = { {-123.429902, 24.581611}, {-67.004124, 49.364142} };
 	    query.locations(locations);
 		twitterStream.filter(query);
 	    
