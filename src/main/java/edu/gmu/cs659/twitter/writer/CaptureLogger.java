@@ -14,12 +14,12 @@ import org.slf4j.LoggerFactory;
 
 import edu.gmu.cs659.twitter.Tweet;
 
-public class CaptureLogger {
+public class CaptureLogger implements TweetWriter {
 	public static final Logger logger = LoggerFactory
 			.getLogger(CaptureLogger.class);
 
 	// clean up data for time series analysis
-	public static final boolean SORT_AND_REMOVE_DUPLICATES = true;
+	public static final boolean SORT_AND_REMOVE_DUPLICATES = false;
 	
 	private Writer writer;
 
@@ -35,6 +35,9 @@ public class CaptureLogger {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see edu.gmu.cs659.twitter.writer.TweetWriter#closeWriter()
+	 */
 	public void closeWriter() {
 		try {
 			writer.close(); 
@@ -51,6 +54,9 @@ public class CaptureLogger {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see edu.gmu.cs659.twitter.writer.TweetWriter#writeData(java.util.List)
+	 */
 	public void writeData(List<Tweet> tweets) {
 		logger.debug("Writing capture file");
 

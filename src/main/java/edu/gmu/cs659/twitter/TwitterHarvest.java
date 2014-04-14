@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import twitter4j.FilterQuery;
+import twitter4j.GeoLocation;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.StallWarning;
@@ -31,7 +32,9 @@ import twitter4j.TwitterFactory;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 import edu.gmu.cs659.twitter.writer.CaptureLogger;
+import edu.gmu.cs659.twitter.writer.KmlGenerator;
 import edu.gmu.cs659.twitter.writer.TermCapture;
+import edu.gmu.cs659.twitter.writer.TweetWriter;
 
 public class TwitterHarvest {
 
@@ -46,6 +49,7 @@ public class TwitterHarvest {
 
 	private static final String STREAMING = "s";
 	private static final String STREAMING_TIMEOUT = "t";
+    private static final double[][] UNITED_STATES_BBOX = { {-123.429902, 24.581611}, {-67.004124, 49.364142} };
 
 	// default values
 	static boolean doStreaming = false;
@@ -115,20 +119,24 @@ public class TwitterHarvest {
 	}
 
 	private void extractTrends() {
-		CaptureLogger capture = new CaptureLogger("output_" + System.currentTimeMillis()
-				+ ".csv");
-		TermCapture termCapture = new TermCapture("tweetTerms_" + System.currentTimeMillis()
-				+ ".csv");
+		
+		List<TweetWriter> writers = new ArrayList<TweetWriter>();
+		
+		writers.add(new CaptureLogger("output_" + System.currentTimeMillis() + ".csv"));
+		writers.add(new TermCapture("tweetTerms_" + System.currentTimeMillis() + ".csv"));
+		writers.add(new KmlGenerator("tweets_" + System.currentTimeMillis() + ".kml"));
+		
 		try {
-			grabTestData(capture, termCapture);
+			grabTestData(writers);
 		} catch (TwitterException e) {
 			logger.error("Failed! : ", e);
 			e.printStackTrace();
 		} catch (Exception e) {
 			logger.error("Failed! : ", e);
 		} finally {
-			capture.closeWriter();
-			termCapture.closeWriter();
+			for(TweetWriter writer : writers) {
+				writer.closeWriter();
+			}
 		}
 	}
 
@@ -145,8 +153,7 @@ public class TwitterHarvest {
 		//twitterStream.sample();
 		
 		FilterQuery query = new FilterQuery();
-	    double[][] locations = { {-123.429902, 24.581611}, {-67.004124, 49.364142} };
-	    query.locations(locations);
+	    query.locations(UNITED_STATES_BBOX);
 		twitterStream.filter(query);
 	    
 		try {
@@ -161,21 +168,22 @@ public class TwitterHarvest {
 	
 	// hmm they stole our project: http://www.hashtags.org/trending-on-twitter/
 		
-	public void grabTestData(CaptureLogger capture, TermCapture termCapture)
-			throws TwitterException {
+	public void grabTestData(List<TweetWriter> writers) throws TwitterException {
 		Trends trends = twitter.getPlaceTrends(WOEID_USA);
 
 		for (Trend trend : trends.getTrends()) {
 			exploreTrend(trend);
 		}
-		
-		capture.writeData(tweets);
-		termCapture.writeData(tweets);
+
+		for(TweetWriter writer : writers) {
+			writer.writeData(tweets);			
+		}
 	}
 
 	private void exploreTrend(Trend trend) throws TwitterException {
 		logger.info(trend.getName());
 		Query query = new Query(trend.getQuery());
+		query.setGeoCode(new GeoLocation(36, -92), 1500, Query.MILES);
 		query.count(1000);
 		QueryResult results = twitter.search(query);
 		for (Status status : results.getTweets()) {
@@ -223,6 +231,7 @@ public class TwitterHarvest {
 		tweet.addAttribute(status.getUser().getName(), true);
 		tweet.addAttribute(status.getFavoriteCount());
 		if (status.getGeoLocation() != null) {
+			tweet.setLocation(status.getGeoLocation());
 			tweet.addAttribute(status.getGeoLocation().getLatitude());
 			tweet.addAttribute(status.getGeoLocation().getLongitude());
 		} else {

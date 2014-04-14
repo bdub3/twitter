@@ -1,5 +1,6 @@
 package edu.gmu.cs659.twitter;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+
+import twitter4j.GeoLocation;
 
 import edu.gmu.cs659.twitter.words.AutoCorrectUtil;
 import edu.gmu.cs659.twitter.words.InternetShortHandChecker;
@@ -26,6 +29,8 @@ public class Tweet {
 	private Long timeStamp;
 	
 	private String tweetClass;
+	
+	private GeoLocation location;
 	
 	private Set<String> terms;
 	
@@ -96,6 +101,14 @@ public class Tweet {
 	public void setTweetStatus(String tweetStatus) {
 		this.tweetStatus = tweetStatus;
 		terms = termifyString(tweetStatus);
+	}
+
+	public GeoLocation getLocation() {
+		return location;
+	}
+
+	public void setLocation(GeoLocation location) {
+		this.location = location;
 	}
 
 	private Set<String> termifyString(String tweetStatus) {
