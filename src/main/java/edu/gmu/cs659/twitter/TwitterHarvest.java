@@ -122,9 +122,10 @@ public class TwitterHarvest {
 		
 		List<TweetWriter> writers = new ArrayList<TweetWriter>();
 		
-		writers.add(new CaptureLogger("output_" + System.currentTimeMillis() + ".csv"));
-		writers.add(new TermCapture("tweetTerms_" + System.currentTimeMillis() + ".csv"));
-		writers.add(new KmlGenerator("tweets_" + System.currentTimeMillis() + ".kml"));
+		long id = System.currentTimeMillis();
+		writers.add(new CaptureLogger("output_" + id + ".csv"));
+		writers.add(new TermCapture("tweetTerms_" + id + ".csv"));
+		writers.add(new KmlGenerator("tweets_" + id + ".kml"));
 		
 		try {
 			grabTestData(writers);
@@ -144,11 +145,17 @@ public class TwitterHarvest {
 	public void captureStreamingSample() {
 		TwitterStreamFactory streamFactory = new TwitterStreamFactory();
 		twitterStream = streamFactory.getInstance();
-		CaptureLogger streamCapture = new CaptureLogger("streamSample_"
-				+ System.currentTimeMillis() + ".csv");
-		streamCapture.writeRow(Tweet.FIELDS);
+		List<TweetWriter> writers = new ArrayList<TweetWriter>();
+		
+		long id = System.currentTimeMillis();
+		writers.add(new CaptureLogger("stream_" + id + ".csv"));
+		writers.add(new TermCapture("streamTerms_" + id + ".csv"));
+		writers.add(new KmlGenerator("stream_" + id + ".kml"));
 
-		twitterStream.addListener(new StreamStatusListener(streamCapture));
+		// no longer writing as we go... memory risk!
+		List<Tweet> tweets = new ArrayList<Tweet>();
+		
+		twitterStream.addListener(new StreamStatusListener(tweets));
 		
 		//twitterStream.sample();
 		
@@ -163,7 +170,10 @@ public class TwitterHarvest {
 		}
 
 		twitterStream.cleanUp();
-		streamCapture.closeWriter();
+		for(TweetWriter writer : writers) {
+			writer.writeData(tweets);
+			writer.closeWriter();
+		}
 	}
 	
 	// hmm they stole our project: http://www.hashtags.org/trending-on-twitter/
@@ -277,15 +287,14 @@ public class TwitterHarvest {
 
     public class StreamStatusListener implements StatusListener {
     	
-    	private CaptureLogger capture;
+    	private List<Tweet> tweets;
     	
-    	public StreamStatusListener(CaptureLogger capture) {
-    		this.capture = capture;
+    	public StreamStatusListener(List<Tweet> tweets) {
+    		this.tweets = tweets;
     	}
     	
         public void onStatus(Status status) {
-        	Tweet tweet = processTweet(status);
-        	capture.writeRow(tweet.getAttributes());
+        	tweets.add(processTweet(status));
         }
 
         public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
