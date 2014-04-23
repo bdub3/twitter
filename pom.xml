@@ -86,6 +86,16 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>weka-dev</artifactId>
+			<version>3.7.10</version>
+		</dependency>
 
+		<dependency>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>optics_dbScan</artifactId>
+			<version>1.0.4</version>
+		</dependency>
 	</dependencies>
 </project>

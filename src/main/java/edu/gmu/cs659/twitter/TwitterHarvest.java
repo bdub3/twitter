@@ -1,7 +1,9 @@
 package edu.gmu.cs659.twitter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.cli.BasicParser;
@@ -153,7 +155,7 @@ public class TwitterHarvest {
 		writers.add(new KmlGenerator("stream_" + id + ".kml"));
 
 		// no longer writing as we go... memory risk!
-		List<Tweet> tweets = new ArrayList<Tweet>();
+		Map<String, Tweet> tweets = new HashMap<String, Tweet>();
 		
 		twitterStream.addListener(new StreamStatusListener(tweets));
 		
@@ -171,7 +173,7 @@ public class TwitterHarvest {
 
 		twitterStream.cleanUp();
 		for(TweetWriter writer : writers) {
-			writer.writeData(tweets);
+			writer.writeData(tweets.values());
 			writer.closeWriter();
 		}
 	}
@@ -239,6 +241,7 @@ public class TwitterHarvest {
 		tweet.addAttribute(status.getLang());
 		tweet.addAttribute(status.getAccessLevel());
 		tweet.addAttribute(status.getUser().getName(), true);
+		tweet.setUser(status.getUser().getName());
 		tweet.addAttribute(status.getFavoriteCount());
 		if (status.getGeoLocation() != null) {
 			tweet.setLocation(status.getGeoLocation());
@@ -287,14 +290,17 @@ public class TwitterHarvest {
 
     public class StreamStatusListener implements StatusListener {
     	
-    	private List<Tweet> tweets;
+    	private Map<String, Tweet> tweets;
     	
-    	public StreamStatusListener(List<Tweet> tweets) {
+    	public StreamStatusListener(Map<String, Tweet> tweets) {
     		this.tweets = tweets;
     	}
     	
         public void onStatus(Status status) {
-        	tweets.add(processTweet(status));
+        	Tweet tweet = processTweet(status);
+        	if(StringUtils.isNotBlank(tweet.getUser()) && StringUtils.isNotBlank(tweet.getCleanedText())) {
+        		tweets.put(tweet.getUser(), tweet);
+        	}
         }
 
         public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {

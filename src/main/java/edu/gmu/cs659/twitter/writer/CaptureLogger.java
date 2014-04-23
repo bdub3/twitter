@@ -57,7 +57,7 @@ public class CaptureLogger implements TweetWriter {
 	/* (non-Javadoc)
 	 * @see edu.gmu.cs659.twitter.writer.TweetWriter#writeData(java.util.List)
 	 */
-	public void writeData(List<Tweet> tweets) {
+	public void writeData(Collection<Tweet> tweets) {
 		logger.debug("Writing capture file");
 
 		writeRow(Tweet.FIELDS);
@@ -68,14 +68,16 @@ public class CaptureLogger implements TweetWriter {
 		}
 		
 		for(Tweet tweet : tweetsToWrite) {
-			this.writeRow(tweet.getAttributes());
+			if(! StringUtils.isBlank(tweet.getCleanedText())) {
+	 			this.writeRow(tweet.getAttributes());				
+			}
 		}
 	}
 
 	// putting in timestamp order and removing any that happen at the same second
 	// wlm - this is kind of garbage, just getting some potential data that can
 	// play in time series stuff
-	private Collection<Tweet> orderTweets(List<Tweet> tweets) {
+	private Collection<Tweet> orderTweets(Collection<Tweet> tweets) {
 		SortedMap<Long, Tweet> orderedTweets = new TreeMap<Long, Tweet>();
 		
 		for(Tweet tweet : tweets) {

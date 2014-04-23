@@ -1,6 +1,7 @@
 package edu.gmu.cs659.twitter.writer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
@@ -20,7 +21,7 @@ public class TermCapture extends CaptureLogger {
 	}
 
 	@Override
-	public void writeData(List<Tweet> tweets) {
+	public void writeData(Collection<Tweet> tweets) {
 		logger.debug("Writing term file");
 		
 		SortedSet<String> terms = new TreeSet<String>();
@@ -45,12 +46,14 @@ public class TermCapture extends CaptureLogger {
 
 		List<Object> counts = new ArrayList<Object>();
 		for(Tweet tweet : tweets) {
-			counts.clear();
-			for(String term : terms) {
-				counts.add(Collections.frequency(tweet.getTerms(), term));
+			if(tweet.getTerms().size() != 0) {
+				counts.clear();
+				for(String term : terms) {
+					counts.add(Collections.frequency(tweet.getTerms(), term));
+				}
+				counts.add(tweet.getSafeTweetClass());
+				this.writeRow(counts);
 			}
-			counts.add(tweet.getSafeTweetClass());
-			this.writeRow(counts);
 		}
 	}
 }

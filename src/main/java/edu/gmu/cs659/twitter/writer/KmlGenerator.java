@@ -3,6 +3,7 @@ package edu.gmu.cs659.twitter.writer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,7 @@ public class KmlGenerator implements TweetWriter {
 		file = new File(fileName);
 	}
 
-	public void writeData(List<Tweet> tweets) {
+	public void writeData(Collection<Tweet> tweets) {
 		for(Tweet tweet : tweets) {
 			if(tweet.getLocation() != null) {
 				writeTweet(tweet);

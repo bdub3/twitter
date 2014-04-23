@@ -1,6 +1,5 @@
 package edu.gmu.cs659.twitter;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +10,6 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
 import twitter4j.GeoLocation;
-
 import edu.gmu.cs659.twitter.words.AutoCorrectUtil;
 import edu.gmu.cs659.twitter.words.InternetShortHandChecker;
 import edu.gmu.cs659.twitter.words.NumericFilter;
@@ -29,6 +27,8 @@ public class Tweet {
 	private Long timeStamp;
 	
 	private String tweetClass;
+
+	private String user;
 	
 	private GeoLocation location;
 	
@@ -72,6 +72,13 @@ public class Tweet {
 
 	public String getSafeTweetClass() {
 		return sanitizeItem(tweetClass);
+	}
+
+	public String getUser() {
+		return user;
+	}
+	public void setUser(String user) {
+		this.user = user;
 	}
 
 	public Set<String> getTweetClassTerms() {
